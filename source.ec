@@ -3,19 +3,19 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* Объявление переменных для подключения к БД */
+/* ГЋГЎГєГїГўГ«ГҐГ­ГЁГҐ ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г»Гµ Г¤Г«Гї ГЇГ®Г¤ГЄГ«ГѕГ·ГҐГ­ГЁГї ГЄ ГЃГ„ */
 exec SQL begin declare section;
-    char db_name[50];      /* Имя базы данных */
-    char user[50];         /* Логин */
-    char password[50];     /* Пароль */
+    char db_name[50];      /* Г€Г¬Гї ГЎГ Г§Г» Г¤Г Г­Г­Г»Гµ */
+    char user[50];         /* Г‹Г®ГЈГЁГ­ */
+    char password[50];     /* ГЏГ Г°Г®Г«Гј */
 exec SQL end declare section;
 
 void ConnectDB() 
 {
 
-      strcpy(db_name, "students"); // Имя базы данных
-      strcpy(user, "pmi-b1408"); // Логин
-      strcpy(password, "Lokdiew4$"); // Пароль
+      strcpy(db_name, "students"); // Г€Г¬Гї ГЎГ Г§Г» Г¤Г Г­Г­Г»Гµ
+      strcpy(user, "pmi-b1408"); // Г‹Г®ГЈГЁГ­
+      strcpy(password, "Lokdiew4$"); // ГЏГ Г°Г®Г«Гј
       printf("Connecting to db \"%s\"...\n", db_name);
       exec SQL connect to :db_name user :user using :password;
       if (sqlca.sqlcode < 0)
@@ -61,31 +61,30 @@ void PrintMenu()
 void Task1()
 {
    /*
-   1. Выдать число изделий, для которых детали с весом больше 12
-      поставлял первый по алфавиту поставщик.
+   1. Г‚Г»Г¤Г ГІГј Г·ГЁГ±Г«Г® ГЁГ§Г¤ГҐГ«ГЁГ©, Г¤Г«Гї ГЄГ®ГІГ®Г°Г»Гµ Г¤ГҐГІГ Г«ГЁ Г± ГўГҐГ±Г®Г¬ ГЎГ®Г«ГјГёГҐ 12
+      ГЇГ®Г±ГІГ ГўГ«ГїГ« ГЇГҐГ°ГўГ»Г© ГЇГ® Г Г«ГґГ ГўГЁГІГі ГЇГ®Г±ГІГ ГўГ№ГЁГЄ.
    */
    exec sql begin declare section;
-      int count; // Результат запроса - число изделий
+      int count; // ГђГҐГ§ГіГ«ГјГІГ ГІ Г§Г ГЇГ°Г®Г±Г  - Г·ГЁГ±Г«Г® ГЁГ§Г¤ГҐГ«ГЁГ©
    exec sql end declare section;
    printf("Starting Task1 request processing...\n");
-   exec sql begin work; //начало транзакции
+   exec sql begin work; //Г­Г Г·Г Г«Г® ГІГ°Г Г­Г§Г ГЄГ¶ГЁГЁ
    exec sql select count(distinct spj.n_izd)
             from spj
             inner join s on s.n_post=spj.n_post
             inner join p on p.n_det=spj.n_det
             where s.name=(select min(name) from s) and p.ves>12
-            )
-   if (sqlca.sqlcode < 0) //проверка кода возврата запроса
+   if (sqlca.sqlcode < 0) //ГЇГ°Г®ГўГҐГ°ГЄГ  ГЄГ®Г¤Г  ГўГ®Г§ГўГ°Г ГІГ  Г§Г ГЇГ°Г®Г±Г 
    {
       printf("Task1 error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
-      exec sql rollback work; // отмена всех изменений в рамках транзакции
+      exec sql rollback work; // Г®ГІГ¬ГҐГ­Г  ГўГ±ГҐГµ ГЁГ§Г¬ГҐГ­ГҐГ­ГЁГ© Гў Г°Г Г¬ГЄГ Гµ ГІГ°Г Г­Г§Г ГЄГ¶ГЁГЁ
       return;
    }
-   else // если успешно завершено
+   else // ГҐГ±Г«ГЁ ГіГ±ГЇГҐГёГ­Г® Г§Г ГўГҐГ°ГёГҐГ­Г®
    {
       printf("Success! code %d\n", sqlca.sqlcode);
       printf("Count: %d\n", count);
-      exec sql commit work; // конец транзакции
+      exec sql commit work; // ГЄГ®Г­ГҐГ¶ ГІГ°Г Г­Г§Г ГЄГ¶ГЁГЁ
       return;
    }
 }
@@ -93,12 +92,12 @@ void Task1()
 void Task2()
 {
    /*
-   2. Поменять местами фамилии первого и последнего по алфавиту
-      поставщика, т. е. первому по алфавиту поставщику установить фами-
-      лию последнего по алфавиту поставщика и наоборот.
+   2. ГЏГ®Г¬ГҐГ­ГїГІГј Г¬ГҐГ±ГІГ Г¬ГЁ ГґГ Г¬ГЁГ«ГЁГЁ ГЇГҐГ°ГўГ®ГЈГ® ГЁ ГЇГ®Г±Г«ГҐГ¤Г­ГҐГЈГ® ГЇГ® Г Г«ГґГ ГўГЁГІГі
+      ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ , ГІ. ГҐ. ГЇГҐГ°ГўГ®Г¬Гі ГЇГ® Г Г«ГґГ ГўГЁГІГі ГЇГ®Г±ГІГ ГўГ№ГЁГЄГі ГіГ±ГІГ Г­Г®ГўГЁГІГј ГґГ Г¬ГЁ-
+      Г«ГЁГѕ ГЇГ®Г±Г«ГҐГ¤Г­ГҐГЈГ® ГЇГ® Г Г«ГґГ ГўГЁГІГі ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ  ГЁ Г­Г Г®ГЎГ®Г°Г®ГІ.
    */
    printf("Starting Task2 request processing...\n");
-   exec sql begin work; //начало транзакци
+   exec sql begin work; //Г­Г Г·Г Г«Г® ГІГ°Г Г­Г§Г ГЄГ¶ГЁ
    exec UPDATE s set name = (CASE WHEN name = (SELECT min(name)
                                        FROM s)
                           THEN (SELECT max(name)
@@ -117,7 +116,7 @@ void Task2()
       exec sql rollback work;
       return;
    }
-   if (sqlca.sqlcode == 100) //проверка на отсутствие данных
+   if (sqlca.sqlcode == 100) //ГЇГ°Г®ГўГҐГ°ГЄГ  Г­Г  Г®ГІГ±ГіГІГ±ГІГўГЁГҐ Г¤Г Г­Г­Г»Гµ
    {
       printf("There is no data to update!\n");
       return;
@@ -126,7 +125,7 @@ void Task2()
    {
       printf("Success! code %d\n", sqlca.sqlcode);
       printf("Changes made: %d\n", sqlca.sqlerrd[2]);
-      exec sql commit work; // конец транзакции
+      exec sql commit work; // ГЄГ®Г­ГҐГ¶ ГІГ°Г Г­Г§Г ГЄГ¶ГЁГЁ
       return;
    }
 }
@@ -135,16 +134,16 @@ void Task2()
 void Task3()
 {
    /*
-   3. Найти изделия, для которых выполнены поставки, вес которых
-      более чем в 4 раза превышает минимальный вес поставки для изделия.
-      Вывести номер изделия, вес поставки, минимальный вес поставки для
-      изделия.
+   3. ГЌГ Г©ГІГЁ ГЁГ§Г¤ГҐГ«ГЁГї, Г¤Г«Гї ГЄГ®ГІГ®Г°Г»Гµ ГўГ»ГЇГ®Г«Г­ГҐГ­Г» ГЇГ®Г±ГІГ ГўГЄГЁ, ГўГҐГ± ГЄГ®ГІГ®Г°Г»Гµ
+      ГЎГ®Г«ГҐГҐ Г·ГҐГ¬ Гў 4 Г°Г Г§Г  ГЇГ°ГҐГўГ»ГёГ ГҐГІ Г¬ГЁГ­ГЁГ¬Г Г«ГјГ­Г»Г© ГўГҐГ± ГЇГ®Г±ГІГ ГўГЄГЁ Г¤Г«Гї ГЁГ§Г¤ГҐГ«ГЁГї.
+      Г‚Г»ГўГҐГ±ГІГЁ Г­Г®Г¬ГҐГ° ГЁГ§Г¤ГҐГ«ГЁГї, ГўГҐГ± ГЇГ®Г±ГІГ ГўГЄГЁ, Г¬ГЁГ­ГЁГ¬Г Г«ГјГ­Г»Г© ГўГҐГ± ГЇГ®Г±ГІГ ГўГЄГЁ Г¤Г«Гї
+      ГЁГ§Г¤ГҐГ«ГЁГї.
    */
    exec sql begin declare section;
-      char n_izd[6]; // Результат запроса - номера деталей
+      char n_izd[6]; // ГђГҐГ§ГіГ«ГјГІГ ГІ Г§Г ГЇГ°Г®Г±Г  - Г­Г®Г¬ГҐГ°Г  Г¤ГҐГІГ Г«ГҐГ©
    exec sql end declare section;
    printf("Starting Task3 request processing...\n");
-   // объявление курсора
+   // Г®ГЎГєГїГўГ«ГҐГ­ГЁГҐ ГЄГіГ°Г±Г®Г°Г 
    exec sql declare curs1 cursor for
       select a.n_izd, a.kol*pa.ves pves, b.mves
       from spj a
@@ -156,22 +155,22 @@ void Task3()
             ) b on b.n_izd=a.n_izd
       where a.kol*pa.ves>b.mves*4
       order by 1,2
-   if (sqlca.sqlcode < 0) // проверка объявления
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГЎГєГїГўГ«ГҐГ­ГЁГї
    {
       printf("declare error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql rollback work;
       return;
    }
-   exec sql begin work; //начало транзакци
-   exec sql open curs1;   // открываем курсор
-   if (sqlca.sqlcode < 0) // проверка открытия
+   exec sql begin work; //Г­Г Г·Г Г«Г® ГІГ°Г Г­Г§Г ГЄГ¶ГЁ
+   exec sql open curs1;   // Г®ГІГЄГ°Г»ГўГ ГҐГ¬ ГЄГіГ°Г±Г®Г°
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГІГЄГ°Г»ГІГЁГї
    {
       printf("open error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql close curs1;
       exec sql rollback work;
       return;
    }
-   exec sql fetch curs1; // следующая строка из активного множества
+   exec sql fetch curs1; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    if (sqlca.sqlcode < 0) 
    {
       printf("fetch error! %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc); 
@@ -188,9 +187,9 @@ void Task3()
    int r_count = 1;
    printf("n_izd\n");
    printf("%s\n", n_izd);
-   while (sqlca.sqlcode == 0) // Пока не дошли до конца активного множества
+   while (sqlca.sqlcode == 0) // ГЏГ®ГЄГ  Г­ГҐ Г¤Г®ГёГ«ГЁ Г¤Г® ГЄГ®Г­Г¶Г  Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    {
-      exec sql fetch curs1; // следующая строка из активного множества
+      exec sql fetch curs1; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
       if (sqlca.sqlcode == 0)
       {
          printf("%s\n", n_izd);
@@ -199,7 +198,7 @@ void Task3()
    }
    if (sqlca.sqlcode == 100)
    {
-      exec sql close curs1; // закрытие курсора
+      exec sql close curs1; // Г§Г ГЄГ°Г»ГІГЁГҐ ГЄГіГ°Г±Г®Г°Г 
       printf("Success!\n");
       printf("Rows processed: %d\n", r_count);
       exec sql commit work;
@@ -218,11 +217,11 @@ void Task3()
 void Task4()
 {
    /*
-   4. Выбрать поставщиков, не поставивших ни одной из деталей,
-      имеющих наименьший вес.
+   4. Г‚Г»ГЎГ°Г ГІГј ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ®Гў, Г­ГҐ ГЇГ®Г±ГІГ ГўГЁГўГёГЁГµ Г­ГЁ Г®Г¤Г­Г®Г© ГЁГ§ Г¤ГҐГІГ Г«ГҐГ©,
+      ГЁГ¬ГҐГѕГ№ГЁГµ Г­Г ГЁГ¬ГҐГ­ГјГёГЁГ© ГўГҐГ±.
    */
    exec sql begin declare section;
-      char n_post[6]; // Результат запроса - номера поставщиков
+      char n_post[6]; // ГђГҐГ§ГіГ«ГјГІГ ГІ Г§Г ГЇГ°Г®Г±Г  - Г­Г®Г¬ГҐГ°Г  ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ®Гў
    exec sql end declare section;
    printf("Starting Task4 request processing...\n");
    exec sql declare curs2 cursor for
@@ -240,22 +239,22 @@ void Task4()
       WHERE NOT EXISTS(SELECT * 
                          FROM spj 
                          WHERE spj.n_post=a.n_post)
-   if (sqlca.sqlcode < 0) // проверка объявления
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГЎГєГїГўГ«ГҐГ­ГЁГї
    {
       printf("declare error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql rollback work;
       return;
    }
-   exec sql begin work; //начало транзакци
-   exec sql open curs2;   // открываем курсор
-   if (sqlca.sqlcode < 0) // проверка открытия
+   exec sql begin work; //Г­Г Г·Г Г«Г® ГІГ°Г Г­Г§Г ГЄГ¶ГЁ
+   exec sql open curs2;   // Г®ГІГЄГ°Г»ГўГ ГҐГ¬ ГЄГіГ°Г±Г®Г°
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГІГЄГ°Г»ГІГЁГї
    {
       printf("open error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql close curs2;
       exec sql rollback work;
       return;
    }
-   exec sql fetch curs2; // следующая строка из активного множества
+   exec sql fetch curs2; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    if (sqlca.sqlcode < 0) 
    {
       printf("fetch error! %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
@@ -266,9 +265,9 @@ void Task4()
    int r_count = 1;
    printf("n_post\n");
    printf("%s\n", n_post);
-   while (sqlca.sqlcode == 0) // Пока не дошли до конца активного множества
+   while (sqlca.sqlcode == 0) // ГЏГ®ГЄГ  Г­ГҐ Г¤Г®ГёГ«ГЁ Г¤Г® ГЄГ®Г­Г¶Г  Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    {
-      exec sql fetch curs2; // следующая строка из активного множества
+      exec sql fetch curs2; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
       if (sqlca.sqlcode == 0)
       {
          printf("%s\n", n_post);
@@ -277,7 +276,7 @@ void Task4()
    }
    if (sqlca.sqlcode == 100)
    {
-      exec sql close curs2; // закрытие курсора
+      exec sql close curs2; // Г§Г ГЄГ°Г»ГІГЁГҐ ГЄГіГ°Г±Г®Г°Г 
       printf("Success!\n");
       printf("Rows processed: %d\n", r_count);
       exec sql commit work;
@@ -296,9 +295,9 @@ void Task4()
 void Task5()
 {
    /*
-   5. Выдать полную информацию о поставщиках, поставляющих
-   ТОЛЬКО красные детали и только для изделия с длиной названия не
-   меньше 7
+   5. Г‚Г»Г¤Г ГІГј ГЇГ®Г«Г­ГіГѕ ГЁГ­ГґГ®Г°Г¬Г Г¶ГЁГѕ Г® ГЇГ®Г±ГІГ ГўГ№ГЁГЄГ Гµ, ГЇГ®Г±ГІГ ГўГ«ГїГѕГ№ГЁГµ
+   Г’ГЋГ‹ГњГЉГЋ ГЄГ°Г Г±Г­Г»ГҐ Г¤ГҐГІГ Г«ГЁ ГЁ ГІГ®Г«ГјГЄГ® Г¤Г«Гї ГЁГ§Г¤ГҐГ«ГЁГї Г± Г¤Г«ГЁГ­Г®Г© Г­Г Г§ГўГ Г­ГЁГї Г­ГҐ
+   Г¬ГҐГ­ГјГёГҐ 7
    */
    exec sql begin declare section;
       char n_post[6], name[20], town[20];
@@ -310,7 +309,7 @@ void Task5()
       JOIN s ON s.n_post=spj.n_post
       WHERE n_det IN (SELECT n_det
                       FROM p
-                      WHERE cvet='Красный') 
+                      WHERE cvet='ГЉГ°Г Г±Г­Г»Г©') 
                       and n_izd in (select n_izd
                                     from j
                                     where name like '______%')
@@ -320,26 +319,26 @@ void Task5()
       JOIN s ON s.n_post=spj.n_post
       WHERE n_det not IN (SELECT n_det
                           FROM p
-                          WHERE cvet='Красный')
+                          WHERE cvet='ГЉГ°Г Г±Г­Г»Г©')
                           and n_izd in (select n_izd
                                         from j
                                         where name like '______%')
-   if (sqlca.sqlcode < 0) // проверка объявления
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГЎГєГїГўГ«ГҐГ­ГЁГї
    {
       printf("declare error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql rollback work;
       return;
    }
-   exec sql begin work; //начало транзакци
-   exec sql open curs3;   // открываем курсор
-   if (sqlca.sqlcode < 0) // проверка открытия
+   exec sql begin work; //Г­Г Г·Г Г«Г® ГІГ°Г Г­Г§Г ГЄГ¶ГЁ
+   exec sql open curs3;   // Г®ГІГЄГ°Г»ГўГ ГҐГ¬ ГЄГіГ°Г±Г®Г°
+   if (sqlca.sqlcode < 0) // ГЇГ°Г®ГўГҐГ°ГЄГ  Г®ГІГЄГ°Г»ГІГЁГї
    {
       printf("open error! code %d: %s\n", sqlca.sqlcode, sqlca.sqlerrm.sqlerrmc);
       exec sql close curs3;
       exec sql rollback work;
       return;
    }
-   exec sql fetch curs3; // следующая строка из активного множества
+   exec sql fetch curs3; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    if (sqlca.sqlcode < 0) 
    {
    
@@ -357,9 +356,9 @@ void Task5()
    int r_count = 1;
    printf("|n_post |name            |reiting         |town         |\n");
    printf("|%.6s|%.20s|%d|%.20s|\n", n_post, name, reiting, town);
-   while (sqlca.sqlcode == 0) // Пока не дошли до конца активного множества
+   while (sqlca.sqlcode == 0) // ГЏГ®ГЄГ  Г­ГҐ Г¤Г®ГёГ«ГЁ Г¤Г® ГЄГ®Г­Г¶Г  Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
    {
-      exec sql fetch curs3; // следующая строка из активного множества
+      exec sql fetch curs3; // Г±Г«ГҐГ¤ГіГѕГ№Г Гї Г±ГІГ°Г®ГЄГ  ГЁГ§ Г ГЄГІГЁГўГ­Г®ГЈГ® Г¬Г­Г®Г¦ГҐГ±ГІГўГ 
       if (sqlca.sqlcode == 0)
       {
          printf("|%.6s|%.20s|%d|%.20s|\n", n_post, name, reiting, town);
@@ -368,7 +367,7 @@ void Task5()
    }
    if (sqlca.sqlcode == 100)
    {
-      exec sql close curs3; // закрытие курсора
+      exec sql close curs3; // Г§Г ГЄГ°Г»ГІГЁГҐ ГЄГіГ°Г±Г®Г°Г 
       printf("Success!\n");
       printf("Rows processed: %d\n", r_count);
       exec sql commit work;
